@@ -27,6 +27,13 @@ type State<T> = ColdFusion.State<T>
 type StyleGuide = ModuleProvider.StyleGuide
 type ValueState<T> = ColdFusion.ValueState<T>
 type CanBeState<T> = ColdFusion.CanBeState<T>
+export type ContrastStandardType = ModuleProvider.ContrastStandardType
+export type GuiAlignmentType = ModuleProvider.GuiAlignmentType
+export type GuiCategoryType = ModuleProvider.GuiCategoryType
+export type GuiColorPalette = ModuleProvider.GuiColorPalette
+export type GuiDensityModifier = ModuleProvider.GuiDensityModifier
+export type GuiThemeType = ModuleProvider.GuiThemeType
+export type GuiTypography = ModuleProvider.GuiTypography
 export type GuiLibrary = {
 	_Maid: Maid,
 	__index: GuiLibrary,
@@ -40,6 +47,7 @@ export type GuiLibrary = {
 	new: (maid: Maid) -> GuiLibrary,
 	init: (maid: Maid) -> nil,
 	SetStyleGuide: (self: GuiLibrary, styleGuide: StyleGuide) -> nil,
+	GetStyleGuide: (self: GuiLibrary) -> StyleGuide,
 	Sound: {
 		Click: Sound,
 		Lock: Sound,
@@ -85,6 +93,10 @@ end
 function GuiLibrary:SetStyleGuide(styleGuide: StyleGuide)
 	ModuleProvider.Override.StyleGuide = styleGuide
 	return nil
+end
+
+function GuiLibrary:GetStyleGuide(): StyleGuide
+	return ModuleProvider.StyleGuide
 end
 
 function GuiLibrary.new(maid: Maid): GuiLibrary
