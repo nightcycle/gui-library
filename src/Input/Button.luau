@@ -86,7 +86,7 @@ export type Button = {
 	new: (maid: Maid) -> Button,
 }
 -- Constants
-local UISounds = script:WaitForChild("UI") :: Folder
+local UISounds = Package:WaitForChild("UI") :: Folder
 local TapSounds = UISounds:WaitForChild("Tap") :: Folder
 local CLICK_SOUND = TapSounds:WaitForChild("A") :: Sound
 -- Variables

@@ -59,7 +59,7 @@ export type GuiLibrary = {
 local GuiLibrary: GuiLibrary = {} :: any
 GuiLibrary.__index = GuiLibrary
 
-local UISounds = script:WaitForChild("UI") :: Folder
+local UISounds = Package:WaitForChild("UI") :: Folder
 local TapSounds = UISounds:WaitForChild("Tap") :: Folder
 local LockSounds = UISounds:WaitForChild("Lock") :: Folder
 

@@ -13,7 +13,7 @@ local PseudoEnum = ModuleProvider.PseudoEnum
 -- Constants
 -- Variables
 -- References
-local UISounds = script:WaitForChild("UI") :: Folder
+local UISounds = Package:WaitForChild("UI") :: Folder
 local TapSounds = UISounds:WaitForChild("Tap") :: Folder
 local LockSounds = UISounds:WaitForChild("Lock") :: Folder
 local CLICK_SOUND = TapSounds:WaitForChild("A") :: Sound

@@ -45,7 +45,7 @@ export type Checkbox = {
 	new: (maid: Maid) -> Checkbox,
 }
 -- Constants
-local UISounds = script:WaitForChild("UI") :: Folder
+local UISounds = Package:WaitForChild("UI") :: Folder
 local LockSounds = UISounds:WaitForChild("Lock") :: Folder
 local LOCK_SOUND = LockSounds:WaitForChild("A") :: Sound
 local UNLOCK_SOUND = LockSounds:WaitForChild("B") :: Sound
