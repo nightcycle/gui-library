@@ -1,4 +1,4 @@
-local REQUIRED_MODULE = require(script.Parent.Parent["nightcycle_table-util@1.1.0"]["table-util"])
+local REQUIRED_MODULE = require(script.Parent.Parent["nightcycle_table-util@1.1.0"]["gui-library"])
 export type Table = REQUIRED_MODULE.Table
 export type Dict<K, V> = REQUIRED_MODULE.Dict<K, V>
 export type List<V> = REQUIRED_MODULE.List<V>
