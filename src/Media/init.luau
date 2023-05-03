@@ -98,7 +98,7 @@ function Media:GetTextLabel(
 		LayoutOrder = layoutOrder,
 		Text = Text,
 		TextSize = StyleGuide:GetTextSize(typography),
-		Font = StyleGuide:GetFont(typography),
+		FontFace = StyleGuide:GetFont(typography),
 		TextColor3 = StyleGuide:GetContrastColor(palette),
 		BackgroundTransparency = 1,
 	}) :: any

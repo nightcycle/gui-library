@@ -66,7 +66,7 @@ local function getHeaderCell(
 				return UDim2.fromOffset(width, 0)
 			end, Width),
 			TextSize = StyleGuide:GetTextSize(guiTypography),
-			Font = StyleGuide:GetFont(guiTypography),
+			FontFace = StyleGuide:GetFont(guiTypography),
 			TextColor3 = StyleGuide:GetContrastColor(backgroundColorPalette),
 			AutomaticSize = Enum.AutomaticSize.Y,
 			RichText = true,

@@ -1,6 +1,6 @@
 {
-  "name": "cold-fusion",
-  "tree": {
-    "$path": "src"
-  }
+     "name": "gui-library",
+     "tree": {
+          "$path": "src"
+     }
 }

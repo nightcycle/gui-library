@@ -116,7 +116,7 @@ function Constructor(config: GuiParameters): Output
 			Size = UDim2.fromOffset(0, 0),
 			BackgroundTransparency = 1,
 			TextColor3 = color,
-			Font = Enum.Font.SourceSansBold,
+			FontFace = Enum.Font.SourceSansBold,
 			AutomaticSize = Enum.AutomaticSize.XY,
 			Position = _Computed(function(pos: Vector2): UDim2
 				return UDim2.fromOffset(pos.X, pos.Y)

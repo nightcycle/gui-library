@@ -2,6 +2,8 @@
 -- Services
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+
 -- Packages
 local VisModule = script.Parent
 assert(VisModule)
@@ -20,12 +22,17 @@ local FormatUtil = require(Packages:WaitForChild("FormatUtil"))
 local ModuleProvider = require(Package:WaitForChild("ModuleProvider"))
 local PseudoEnum = ModuleProvider.PseudoEnum
 local Layout = require(Package:WaitForChild("Layout"))
+local Effect = require(Package:WaitForChild("Effect"))
 local StyleGuide = ModuleProvider.StyleGuide
+
 -- Types
 type Maid = Maid.Maid
 type Signal = Signal.Signal
 type ValueState<T> = ColdFusion.ValueState<T>
+type CanBeState<T> = ColdFusion.CanBeState<T>
 type State<T> = ColdFusion.State<T>
+type Dict<K,V> = TableUtil.Dict<K,V>
+type List<V> = TableUtil.List<V>
 type DataPoint = {
 	Key: string,
 	Value: Vector2,
@@ -36,6 +43,13 @@ type LineData = {
 	Value: number,
 }
 type Layout = Layout.Layout
+export type DataTable = {
+	Data: State<Dict<string, Vector2>>,
+	Id: string,
+	Name: string,
+	Color: CanBeState<Color3>,
+	LayoutOrder: number?
+}
 
 -- Constants
 local ZERO = Vector2.new(0, 0)
@@ -43,6 +57,12 @@ local DOT_TO_LINE_RATIO = 2
 local GRID_LINE_WEIGHT = 0.5
 local GOAL_HORIZONTAL_GRID_LINES = 5
 local GOAL_VERTICAL_GRID_LINES = 5
+local DESELECTED_GRAPH_TRANSPARENCY = 0.8
+
+-- Ref
+local UISounds = Package:WaitForChild("UI") :: Folder
+local TapSounds = UISounds:WaitForChild("Tap") :: Folder
+local CLICK_SOUND = TapSounds:WaitForChild("A") :: Sound
 
 -- Private functions
 local function emptyDataPoint(): DataPoint
@@ -73,7 +93,8 @@ local function newLine(
 	start: DataPoint,
 	finish: DataPoint,
 	Thickness: State<UDim>,
-	Color: State<Color3>
+	Color: State<Color3>,
+	Transparency: State<number>
 ): Frame
 	local _fuse = ColdFusion.fuse(maid)
 	local _synth = Synthetic(maid)
@@ -107,6 +128,7 @@ local function newLine(
 		Name = "Line",
 		Parent = parent,
 		Rotation = Angle,
+		BackgroundTransparency = Transparency,
 		ZIndex = 9,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color,
@@ -124,7 +146,8 @@ local function newGraphDot(
 	parent: Frame,
 	dataPoint: DataPoint,
 	Thickness: State<UDim>,
-	Color: State<Color3>
+	Color: State<Color3>,
+	Transparency: State<number>
 ): Frame
 	local _fuse = ColdFusion.fuse(maid)
 	local _synth = Synthetic(maid)
@@ -144,6 +167,7 @@ local function newGraphDot(
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		ZIndex = 10,
 		BackgroundColor3 = Color,
+		BackgroundTransparency = Transparency,
 		Position = _Computed(function(data: DataPoint)
 			return UDim2.fromScale(data.Value.X, 1 - data.Value.Y)
 		end, Data),
@@ -166,7 +190,8 @@ function newGridLine(
 	start: Vector2,
 	finish: Vector2,
 	Thickness: State<UDim>,
-	Color: State<Color3>
+	Color: State<Color3>,
+	Transparency: State<number>
 ): Frame
 	local _fuse = ColdFusion.fuse(maid)
 	local _synth = Synthetic(maid)
@@ -184,7 +209,7 @@ function newGridLine(
 	local finishPoint = emptyDataPoint()
 	finishPoint.Value = finish
 
-	local line = newLine(maid, parent, startPoint, finishPoint, Thickness, Color)
+	local line = newLine(maid, parent, startPoint, finishPoint, Thickness, Color, Transparency)
 	line.Name = "GridLine"
 	line.ZIndex = 6
 	return line
@@ -207,6 +232,9 @@ function newGridLabel(
 
 	local _Value = _fuse.Value
 	local _Computed = _fuse.Computed
+	
+	value = math.round(100*value)/100
+	local valueText = if value > 1 then FormatUtil.insertCommas(value) else tostring(value)
 
 	return _new("TextLabel")({
 		Name = "YText",
@@ -215,30 +243,27 @@ function newGridLabel(
 		Position = position,
 		Parent = parent,
 		Size = UDim2.fromOffset(0, 0),
-		Font = StyleGuide:GetFont(PseudoEnum.GuiTypography.Body1),
+		FontFace = StyleGuide:GetFont(PseudoEnum.GuiTypography.Body1),
 		TextSize = StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Body1),
 		TextColor3 = TextColor,
-		Text = if value > 1 then FormatUtil.insertCommas(value) else tostring(value),
+		Text = valueText,
 		RichText = true,
 		LayoutOrder = 1,
 		AutomaticSize = Enum.AutomaticSize.XY,
 	})
 end
 
-return function(
+function newDataRender(	
 	maid: Maid,
-	XAxisLabel: State<string>,
-	YAxisLabel: State<string>,
-	Data: State<{ [string]: Vector2 }>,
-	CanvasSize: State<UDim2>,
-	Thickness: State<UDim>,
-	CanvasColor: State<Color3>,
 	Color: State<Color3>,
-	GridLineColor: State<Color3>,
-	TextColor: State<Color3>
-): Frame
+	Data: State<Dict<string, Vector2>>,
+	BackgroundColor: State<Color3>,
+	Thickness: State<UDim>,
+	Transparency: State<number>,
+	StartCorner: State<Vector2>,
+	Range: State<Vector2>
+)
 	local _fuse = ColdFusion.fuse(maid)
-	local _synth = Synthetic(maid)
 	local _new = _fuse.new
 	local _bind = _fuse.bind
 	local _import = _fuse.import
@@ -247,39 +272,6 @@ return function(
 
 	local _Value = _fuse.Value
 	local _Computed = _fuse.Computed
-
-	local LabelTypography = PseudoEnum.GuiTypography.Button
-
-	local StartCorner = _Computed(function(data: { [string]: Vector2 })
-		local minX = math.huge
-		for k, v in pairs(data) do
-			minX = math.min(v.X, minX)
-		end
-		local minY = math.huge
-		for k, v in pairs(data) do
-			minY = math.min(v.Y, minY)
-		end
-		-- print("MINX", minX, "MINY", minY)
-		return Vector2.new(minX, minY)
-	end, Data)
-
-	local FinishCorner = _Computed(function(data: { [string]: Vector2 })
-		local maxX = -math.huge
-		for k, v in pairs(data) do
-			maxX = math.max(v.X, maxX)
-		end
-		local maxY = -math.huge
-		for k, v in pairs(data) do
-			maxY = math.max(v.Y, maxY)
-		end
-		-- print("MAXX", maxX, "MAXY", maxY)
-		return Vector2.new(maxX, maxY)
-	end, Data)
-
-	local Range = _Computed(function(start: Vector2, finish: Vector2)
-		-- print("RANGE",finish - start )
-		return finish - start
-	end, StartCorner, FinishCorner)
 
 	local ScaledData = _Computed(
 		function(data: { [string]: Vector2 }, start: Vector2, range: Vector2): { [string]: Vector2 }
@@ -336,16 +328,106 @@ return function(
 	)
 
 	local canvas: Frame = _new("Frame")({
-		Name = "Canvas",
-		Size = CanvasSize,
+		Name = "LineCanvas",
+		Size = UDim2.fromScale(1,1),
 		ClipsDescendants = true,
-		BackgroundColor3 = CanvasColor,
+		BackgroundTransparency = 1,
 		LayoutOrder = 3,
-		ZIndex = 1,
+		ZIndex = 10,
 		Children = {
 			_layout:GetUIPadding(PseudoEnum.GuiDensityModifier.High),
 		} :: { [number]: any },
 	}) :: any
+
+	local LineColor = _Computed(function(backColor: Color3, color: Color3): Color3
+		return StyleGuide.getReadableColor(color, backColor)
+	end, BackgroundColor, Color)
+
+	DataVectorPairs:ForValues(function(v: { [number]: DataPoint }, processorMaid: Maid)
+		local startPoint: DataPoint = v[1]
+		local finishPoint: DataPoint = v[2]
+		newGraphDot(processorMaid, canvas, startPoint, Thickness, LineColor, Transparency)
+		newLine(processorMaid, canvas, startPoint, finishPoint, Thickness, LineColor, Transparency)
+		return v
+	end)
+
+	return canvas
+end
+
+return function(
+	maid: Maid,
+	dataTables: Dict<any, DataTable>,
+	XAxisLabel: State<string>,
+	YAxisLabel: State<string>,
+	CanvasSize: State<UDim2>,
+	Thickness: State<UDim>,
+	CanvasColor: State<Color3>,
+	GridLineColor: State<Color3>,
+	TextColor: State<Color3>,
+	SelectedLegendColor: State<Color3>
+): Frame
+	
+	local _fuse = ColdFusion.fuse(maid)
+	local _synth = Synthetic(maid)
+	local _new = _fuse.new
+	local _bind = _fuse.bind
+	local _import = _fuse.import
+
+	local _layout = Layout.new(maid)
+	local _effect = Effect.new(maid)
+
+	local _Value = _fuse.Value
+	local _Computed = _fuse.Computed
+
+	local LabelTypography = PseudoEnum.GuiTypography.Body1
+
+	local dataTableList = TableUtil.values(dataTables)
+	local dataStateList: List<State<{[string]: Vector2}>> = {}
+	for i, dataTable in ipairs(dataTableList) do
+		table.insert(dataStateList, dataTable.Data)
+	end
+
+	local CompositeDataSet = _Computed(function(...: {[string]: Vector2}): {[string]: Vector2}
+		local compData = {}
+		for i, data in ipairs({...}) do
+			for k, v in pairs(data) do
+				local key = k.."_"..tostring(i)
+				compData[key] = v
+			end
+		end
+		return compData
+	end, unpack(dataStateList))
+
+	local StartCorner = _Computed(function(data: { [string]: Vector2 })
+		local minX = math.huge
+		for k, v in pairs(data) do
+			minX = math.min(v.X, minX)
+		end
+		local minY = math.huge
+		for k, v in pairs(data) do
+			minY = math.min(v.Y, minY)
+		end
+		-- print("MINX", minX, "MINY", minY)
+		return Vector2.new(minX, minY)
+	end, CompositeDataSet)
+
+	local FinishCorner = _Computed(function(data: { [string]: Vector2 })
+		local maxX = -math.huge
+		for k, v in pairs(data) do
+			maxX = math.max(v.X, maxX)
+		end
+		local maxY = -math.huge
+		for k, v in pairs(data) do
+			maxY = math.max(v.Y, maxY)
+		end
+		-- print("MAXX", maxX, "MAXY", maxY)
+		return Vector2.new(maxX, maxY)
+	end, CompositeDataSet)
+
+	local Range = _Computed(function(start: Vector2, finish: Vector2)
+		-- print("RANGE",finish - start )
+		return finish - start
+	end, StartCorner, FinishCorner)
 
 	local YLabelWidth = _Value(0)
 	local YLabelSize = _Computed(function(size: UDim2, width: number): UDim2
@@ -369,7 +451,19 @@ return function(
 		Size = XLabelSize,
 		AutomaticSize = Enum.AutomaticSize.Y,
 	}) :: any
-	local inst: Frame = _layout:GetContainer({
+
+	local canvas: Frame = _new("Frame")({
+		Name = "Canvas",
+		Size = CanvasSize,
+		ClipsDescendants = true,
+		BackgroundTransparency = 0,
+		BackgroundColor3 = CanvasColor,
+		LayoutOrder = 3,
+		ZIndex = 1,
+		Children = {} :: { [number]: any },
+	}) :: any
+
+	local graphInstance: Frame = _layout:GetContainer({
 		_layout:GetVerticalList(PseudoEnum.GuiAlignmentType.TopRight, PseudoEnum.GuiDensityModifier.High) :: any,
 		xLabels,
 		_layout:GetContainer({
@@ -388,7 +482,7 @@ return function(
 						Name = "TextLabel",
 						BackgroundTransparency = 1,
 						Size = UDim2.fromScale(0, 0),
-						Font = StyleGuide:GetFont(LabelTypography),
+						FontFace = StyleGuide:GetFont(LabelTypography),
 						TextSize = StyleGuide:GetTextSize(LabelTypography),
 						TextColor3 = TextColor,
 						Text = YAxisLabel,
@@ -408,7 +502,7 @@ return function(
 			Name = "XText",
 			BackgroundTransparency = 1,
 			Size = XLabelSize,
-			Font = StyleGuide:GetFont(LabelTypography),
+			FontFace = StyleGuide:GetFont(LabelTypography),
 			TextSize = StyleGuide:GetTextSize(LabelTypography),
 			TextColor3 = TextColor,
 			Text = XAxisLabel,
@@ -522,13 +616,10 @@ return function(
 		return UDim.new(thickness.Scale * GRID_LINE_WEIGHT, math.ceil(thickness.Offset * GRID_LINE_WEIGHT))
 	end, Thickness)
 
-	print("HLD", HorizontalLineData:Get())
-
 	HorizontalLineData:ForValues(function(v: LineData, processorMaid: Maid)
-		print("V", v)
 		local scale = 1 - v.Start.Y
 		if scale >= 0 and scale <= 1 then
-			newGridLine(processorMaid, canvas, v.Start, v.Finish, GridLineThickness, GridLineColor)
+			newGridLine(processorMaid, canvas, v.Start, v.Finish, GridLineThickness, GridLineColor, _Value(0))
 			newGridLabel(processorMaid, yLabels, v.Value, Vector2.new(1, 0.5), UDim2.fromScale(1, scale), TextColor)
 		end
 		return v
@@ -537,19 +628,36 @@ return function(
 	VerticalLineData:ForValues(function(v: LineData, processorMaid: Maid)
 		local scale = v.Start.X
 		if scale >= 0 and scale <= 1 then
-			newGridLine(processorMaid, canvas, v.Start, v.Finish, GridLineThickness, GridLineColor)
+			newGridLine(processorMaid, canvas, v.Start, v.Finish, GridLineThickness, GridLineColor, _Value(0))
 			newGridLabel(processorMaid, xLabels, v.Value, Vector2.new(0.5, 0), UDim2.fromScale(scale, 0), TextColor)
 		end
 		return v
 	end)
 
-	DataVectorPairs:ForValues(function(v: { [number]: DataPoint }, processorMaid: Maid)
-		local startPoint: DataPoint = v[1]
-		local finishPoint: DataPoint = v[2]
-		newGraphDot(processorMaid, canvas, startPoint, Thickness, Color)
-		newLine(processorMaid, canvas, startPoint, finishPoint, Thickness, Color)
-		return v
-	end)
+	local SelectedDataTable: ValueState<string?> = _Value(nil :: string?)
+	local transparencyRegistry: Dict<string, State<number>> = {}
+
+	for k, dataTable in pairs(dataTables) do
+		local DataColorState = _import(dataTable.Color, Color3.new(0,0,1))
+		transparencyRegistry[dataTable.Id] = _Computed(function(id: string?)
+			if id == nil or id == dataTable.Id then
+				return 0
+			else
+				return DESELECTED_GRAPH_TRANSPARENCY
+			end
+		end, SelectedDataTable):Tween()
+		local dataRender = newDataRender(
+			maid,
+			DataColorState,
+			dataTable.Data,
+			CanvasColor,
+			Thickness,
+			transparencyRegistry[dataTable.Id]:Tween(),
+			StartCorner,
+			Range
+		)
+		dataRender.Parent = canvas
+	end
 
 	maid:GiveTask(RunService.RenderStepped:Connect(function(deltaTime: number)
 		local xMaxHeight = 0
@@ -567,6 +675,84 @@ return function(
 		XLabelHeight:Set(xMaxHeight)
 		YLabelWidth:Set(yMaxWidth)
 	end))
+	local legendInstances = {
+		_layout:GetVerticalList(PseudoEnum.GuiAlignmentType.TopRight, PseudoEnum.GuiDensityModifier.High) :: any,
+		graphInstance
+	}
+	for id, _Transparency in pairs(transparencyRegistry) do
+		local dataTable: DataTable? = nil
+		for k, possibleTable in pairs(dataTables) do
+			if possibleTable.Id == id then
+				dataTable = possibleTable
+			end
+		end
+		assert(dataTable)
+		local ButtonColor = _Computed(function(selected: string?, defColor: Color3, selColor: Color3)
+			if selected ~= id then
+				return defColor
+			else
+				return selColor
+			end
+		end, SelectedDataTable, CanvasColor, SelectedLegendColor, TextColor):Tween()
 
+		local ButtonTextColor = _Computed(function(buttonColor: Color3, textColor: Color3)
+			return StyleGuide.getReadableColor(textColor, buttonColor)
+		end, ButtonColor, TextColor)
+
+		local button = _new("TextButton")({
+			Name = id,
+			AutoButtonColor = true,
+			BackgroundColor3 = ButtonColor,
+			LayoutOrder = dataTable.LayoutOrder,
+			Events = {
+				Activated = function()
+					SoundService:PlayLocalSound(CLICK_SOUND)
+					if SelectedDataTable:Get() == id then
+						SelectedDataTable:Set(nil)
+					else
+						SelectedDataTable:Set(id)
+					end
+				end,
+			},
+			AutomaticSize = Enum.AutomaticSize.XY,
+			Children = {
+				_layout:GetHorizontalList(PseudoEnum.GuiAlignmentType.Center, PseudoEnum.GuiDensityModifier.High) :: any,
+				_effect:GetUICorner(),
+				_layout:GetUIPadding(PseudoEnum.GuiDensityModifier.High, true),
+				_new("Frame")({
+					BackgroundColor3 = dataTable.Color,
+					Size = _Computed(function(txtSize: number)
+						local iconSize = math.round(0.6*txtSize)
+						return UDim2.fromOffset(iconSize, iconSize)
+					end, StyleGuide:GetTextSize(LabelTypography)),
+					Children = {
+						_effect:GetUICorner(1),
+					},
+				}),
+				_new("TextLabel")({
+					Name = "ButtonText",
+					BackgroundTransparency = 1,
+					Size = UDim2.fromOffset(0,0),
+					FontFace = StyleGuide:GetFont(LabelTypography),
+					TextSize = StyleGuide:GetTextSize(LabelTypography),
+					TextColor3 = ButtonTextColor,
+					Text = dataTable.Name,
+					RichText = true,
+					LayoutOrder = 3,
+					AutomaticSize = Enum.AutomaticSize.XY,
+				}),
+			},
+		})
+		table.insert(legendInstances, button)
+	end
+
+	local legend = _layout:GetContainer(legendInstances, "High", 2, "Legend", nil)
+
+	local inst = _layout:GetContainer({
+		_layout:GetHorizontalList(PseudoEnum.GuiAlignmentType.TopRight, PseudoEnum.GuiDensityModifier.High) :: any,
+		graphInstance,
+		legend
+	}, "High", nil, "Graph", nil)
+	
 	return inst
 end

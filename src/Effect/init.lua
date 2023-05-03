@@ -104,7 +104,7 @@ function Effect:GetHint(
 		Text = text,
 		BackgroundColor3 = StyleGuide:GetContrastColor(palette),
 		TextColor3 = StyleGuide:GetColor(palette),
-		Font = StyleGuide:GetFont(typography),
+		FontFace = StyleGuide:GetFont(typography),
 		TextSize = StyleGuide:GetTextSize(typography),
 		AnchorPoint = anchorPoint,
 		CornerRadius = StyleGuide.CornerRadius,

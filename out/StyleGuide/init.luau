@@ -315,7 +315,7 @@ function Guide.new(): StyleGuide
 		Background
 	)
 	local MinTextSize = _Computed(function(vSize: Vector2): number
-		return math.max(math.ceil(0.05 * vSize.Y), ABS_MIN_TEXT_SIZE)
+		return math.max(math.ceil(0.015 * vSize.Y), ABS_MIN_TEXT_SIZE)
 	end, ViewportSize)
 	local MinimumTextSizeTween = MinTextSize:Tween()
 

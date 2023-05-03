@@ -102,7 +102,7 @@ local function newChip(
 		Text = text,
 		LayoutOrder = LayoutOrder,
 		TextSize = TextSize,
-		Font = Font,
+		FontFace = Font,
 		AutomaticSize = Enum.AutomaticSize.XY,
 		AutoButtonColor = _Computed(function(sel: string)
 			return sel ~= text
@@ -308,19 +308,6 @@ local function newSpectrumPanel(
 	local Padding = _Computed(function(txtSize: number): UDim
 		return UDim.new(0, txtSize * 0.5)
 	end, TextSize)
-
-	-- local InputVal = _Computed(function(col: Color3)
-	-- 	local _h,_s,v = col:ToHSV()
-	-- 	return v
-	-- end, Value)
-	-- local InputHue = _Computed(function(col: Color3)
-	-- 	local h = col:ToHSV()
-	-- 	return h
-	-- end, Value)
-	-- local InputSat = _Computed(function(col: Color3)
-	-- 	local _h,s = col:ToHSV()
-	-- 	return s
-	-- end, Value)
 
 	local iH, iS, iV = Value:Get():ToHSV()
 	local OutputValue = _Value(iV)

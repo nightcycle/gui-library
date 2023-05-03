@@ -44,6 +44,7 @@ export type ColumnInput = {
 
 export type ColumnData = Types.ColumnData
 
+
 local function buildDefaultCell(
 	maid: Maid,
 	val: any,
@@ -63,7 +64,7 @@ local function buildDefaultCell(
 
 	return _new("TextLabel")({
 		Text = tostring(val),
-		Font = StyleGuide:GetFont(typography),
+		FontFace = StyleGuide:GetFont(typography),
 		TextColor3 = StyleGuide:GetContrastColor(backgroundColorPalette),
 		TextSize = StyleGuide:GetTextSize(typography),
 		RichText = true,
@@ -83,7 +84,6 @@ local function buildDefaultCell(
 	}) :: TextLabel
 end
 
--- Constants
 return function(
 	maid: Maid,
 	Data: State<{ [number]: { [string]: any } }>,
@@ -287,7 +287,6 @@ return function(
 		if headerFrame then
 			HeaderHeight:Set(headerFrame.AbsoluteSize.Y)
 			local widths = {}
-			local frameHeight = HeaderHeight:Get()
 			local headerTextSize = StyleGuide:GetTextSize(headerTypography):Get()
 			local headerFont: Font = StyleGuide:GetFont(headerTypography):Get()
 			for i, cell in ipairs(headerFrame:GetChildren()) do
@@ -296,14 +295,20 @@ return function(
 					local cData = columnRegistry[cell.Name]
 
 					local widthWeight = cData.WidthWeight or 1
-					local textAbsSize = TextService:GetTextSize(
-						cData.Text,
-						headerTextSize,
-						headerFont :: any,
-						Vector2.new(math.huge, frameHeight)
-					)
 
-					widths[cell.Name] = math.max(widths[cell.Name], textAbsSize.X * widthWeight)
+					local params = Instance.new("GetTextBoundsParams")
+					params.Text = cData.Text
+					params.Font = headerFont
+					params.Size = headerTextSize
+					params.Width = math.huge
+			
+					local success = pcall(function()
+						local textAbsSize = TextService:GetTextBoundsAsync(params)
+						widths[cell.Name] = math.max(widths[cell.Name], textAbsSize.X * widthWeight)
+					end)
+					if not success then
+						print("text bound async failed for "..cell.Name)
+					end
 				end
 			end
 			HeaderWidths:Set(widths)

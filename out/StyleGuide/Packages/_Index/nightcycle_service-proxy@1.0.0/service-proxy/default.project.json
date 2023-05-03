@@ -1,6 +1,6 @@
 {
-  "name": "service-proxy",
-  "tree": {
-    "$path": "src"
-  }
+     "name": "gui-library",
+     "tree": {
+          "$path": "src"
+     }
 }

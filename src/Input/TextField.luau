@@ -152,7 +152,7 @@ function TextField:_GetState(
 		Width = width,
 		CornerRadius = StyleGuide.CornerRadius :: any,
 		TextSize = StyleGuide:GetTextSize(typography),
-		Font = StyleGuide:GetFont(typography),
+		FontFace = StyleGuide:GetFont(typography),
 		CharacterLimit = nil,
 		MaintainLowerSpacing = false,
 		ClearTextOnFocus = true,

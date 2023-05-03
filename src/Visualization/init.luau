@@ -8,6 +8,7 @@ assert(Packages)
 local Maid = require(Packages:WaitForChild("Maid"))
 local Synthetic = require(Packages:WaitForChild("Synthetic"))
 local ColdFusion = require(Packages:WaitForChild("ColdFusion"))
+local TableUtil = require(Packages:WaitForChild("TableUtil"))
 -- Modules
 local Graph = require(script:WaitForChild("Graph"))
 local RadarChart = require(script:WaitForChild("RadarChart"))
@@ -20,6 +21,8 @@ type Maid = Maid.Maid
 type ValueState<T> = ColdFusion.ValueState<T>
 type State<T> = ColdFusion.State<T>
 type CanBeState<T> = ColdFusion.CanBeState<T>
+type Dict<K, V> = TableUtil.Dict<K,V>
+type DataTable = Graph.DataTable
 export type Visualization = {
 	__index: Visualization,
 	_Maid: Maid,
@@ -27,10 +30,10 @@ export type Visualization = {
 	Destroy: (self: Visualization) -> nil,
 	GetGraph: (
 		self: Visualization,
-		data: CanBeState<{ [string]: Vector2 }>,
+		dataTables: Dict<any, DataTable>,
 		backgroundColor: ModuleProvider.GuiColorPalette,
 		canvasColor: ModuleProvider.GuiColorPalette,
-		color: ModuleProvider.GuiColorPalette,
+		selectionColor: ModuleProvider.GuiColorPalette,
 		xAxisLabel: CanBeState<string>?,
 		yAxisLabel: CanBeState<string>?,
 		canvasSize: CanBeState<UDim2>?
@@ -64,10 +67,10 @@ function Visualization:GetRadarChart(config: RadarChart.GuiParameters)
 end
 
 function Visualization:GetGraph(
-	data: CanBeState<{ [string]: Vector2 }>,
+	dataTables: Dict<any, DataTable>,
 	backgroundColor: ModuleProvider.GuiColorPalette,
 	canvasColor: ModuleProvider.GuiColorPalette,
-	color: ModuleProvider.GuiColorPalette,
+	selectionColor: ModuleProvider.GuiColorPalette,
 	xAxisLabel: CanBeState<string>?,
 	yAxisLabel: CanBeState<string>?,
 	canvasSize: CanBeState<UDim2>?
@@ -83,7 +86,6 @@ function Visualization:GetGraph(
 
 	local XAxisLabel: State<string> = _import(xAxisLabel, "X-Axis")
 	local YAxisLabel: State<string> = _import(yAxisLabel, "Y-Axis")
-	local Data: State<{ [string]: Vector2 }> = _import(data, {})
 	local CanvasSize: State<UDim2> = (
 		if canvasSize
 			then _import(canvasSize, UDim2.fromOffset(0, 0))
@@ -95,26 +97,23 @@ function Visualization:GetGraph(
 	local Thickness: State<UDim> = _Computed(function(txtSize: number)
 		return UDim.new(0, math.ceil(txtSize / 4))
 	end, StyleGuide:GetTextSize(PseudoEnum.GuiTypography.Body1))
-	local CanvasColor: State<Color3> = StyleGuide:GetColor(canvasColor or PseudoEnum.GuiColorPalette.Surface2)
+	local canvasPalette = canvasColor or PseudoEnum.GuiColorPalette.Surface2
+	local CanvasColor: State<Color3> = StyleGuide:GetColor(canvasPalette)
 	local GridLineColor: State<Color3> = StyleGuide:GetContrastColor(canvasColor or PseudoEnum.GuiColorPalette.Surface2)
-	local Color: State<Color3> = StyleGuide:GetContrastColor(
-		canvasColor or PseudoEnum.GuiColorPalette.Surface2,
-		color or PseudoEnum.GuiColorPalette.Primary2
-	)
-
 	local TextColor: State<Color3> = StyleGuide:GetContrastColor(backgroundColor or PseudoEnum.GuiColorPalette.Surface1)
+	local SelectionColor: State<Color3> = StyleGuide:GetContrastColor(selectionColor or PseudoEnum.GuiColorPalette.Secondary2, canvasPalette)
 
 	return Graph(
 		self._Maid,
+		dataTables,
 		XAxisLabel,
 		YAxisLabel,
-		Data,
 		CanvasSize,
 		Thickness,
 		CanvasColor,
-		Color,
 		GridLineColor,
-		TextColor
+		TextColor,
+		SelectionColor
 	)
 end
 

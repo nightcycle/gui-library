@@ -1,3 +1,4 @@
+foreman install
 pseudo-enum build test.project.json
 style-guide build out/StyleGuide.luau -dark
 py scripts/edit_style_guide.py
