@@ -148,12 +148,12 @@ function getSolvedAbsoluteSizeState(frame: Frame, maid: Maid): State<UDim2>
 			guiObject.Rotation
 		)
 		local relMinV2 = Vector2.new(
-			math.round(math.max(math.min(upperLeftCorner.X, lowerRightCorner.X, upperRightCorner.X, lowerLeftCorner.X), 0)),
-			math.round(math.max(math.min(upperLeftCorner.Y, lowerRightCorner.Y, upperRightCorner.Y, lowerLeftCorner.Y), 0))
+			math.round(math.max(math.min(upperLeftCorner.X, lowerRightCorner.X, upperRightCorner.X, lowerLeftCorner.X))),
+			math.round(math.max(math.min(upperLeftCorner.Y, lowerRightCorner.Y, upperRightCorner.Y, lowerLeftCorner.Y)))
 		)
 		local relMaxV2 = Vector2.new(
-			math.round(math.max(upperLeftCorner.X, lowerRightCorner.X, upperRightCorner.X, lowerLeftCorner.X, 0)),
-			math.round(math.max(upperLeftCorner.Y, lowerRightCorner.Y, upperRightCorner.Y, lowerLeftCorner.Y, 0))
+			math.round(math.max(upperLeftCorner.X, lowerRightCorner.X, upperRightCorner.X, lowerLeftCorner.X)),
+			math.round(math.max(upperLeftCorner.Y, lowerRightCorner.Y, upperRightCorner.Y, lowerLeftCorner.Y))
 		)
 		guiObject:SetAttribute("relMinV2", relMinV2)
 		guiObject:SetAttribute("relMaxV2", relMaxV2)
