@@ -78,7 +78,7 @@ local function newChip(
 	SelBackColor: State<Color3>,
 	SelTextColor: State<Color3>,
 	TextSize: State<number>,
-	Font: State<Enum.Font>,
+	FontFace: State<Enum.Font>,
 	Sound: State<Sound>
 )
 	local _fuse = ColdFusion.fuse(maid)
@@ -102,7 +102,7 @@ local function newChip(
 		Text = text,
 		LayoutOrder = LayoutOrder,
 		TextSize = TextSize,
-		FontFace = Font,
+		FontFace = FontFace,
 		AutomaticSize = Enum.AutomaticSize.XY,
 		AutoButtonColor = _Computed(function(sel: string)
 			return sel ~= text
@@ -492,7 +492,7 @@ function Constructor(config: GuiParameters): Output
 	local TextColor3 = _import(config.TextColor3, Color3.new(1, 1, 1))
 	local SelectionBackgroundColor3 = _import(config.SelectionBackgroundColor3, Color3.fromHSV(0.6, 1, 0.8))
 	local SelectionTextColor3 = _import(config.SelectionTextColor3, Color3.new(1, 1, 1))
-	local Font = _import(config.Font, Enum.Font.Gotham)
+	local FontFace = _import(config.Font, Font.fromEnum(Enum.Font.Gotham))
 
 	local TextSize = _import(config.TextSize, 12)
 
@@ -622,7 +622,7 @@ function Constructor(config: GuiParameters): Output
 						SelectionBackgroundColor3,
 						SelectionTextColor3,
 						TextSize,
-						Font,
+						FontFace,
 						Sound
 					),
 					newChip(
@@ -635,7 +635,7 @@ function Constructor(config: GuiParameters): Output
 						SelectionBackgroundColor3,
 						SelectionTextColor3,
 						TextSize,
-						Font,
+						FontFace,
 						Sound
 					),
 					-- newChip(_maid,"Input", 3, Mode, BackgroundColor3, TextColor3, SelectionBackgroundColor3, SelectionTextColor3, TextSize, Font, Sound),

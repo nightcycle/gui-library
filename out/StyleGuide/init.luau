@@ -315,7 +315,7 @@ function Guide.new(): StyleGuide
 		Background
 	)
 	local MinTextSize = _Computed(function(vSize: Vector2): number
-		return math.max(math.ceil(0.015 * vSize.Y), ABS_MIN_TEXT_SIZE)
+		return math.max(math.ceil(0.0075 * vSize.Y), ABS_MIN_TEXT_SIZE)
 	end, ViewportSize)
 	local MinimumTextSizeTween = MinTextSize:Tween()
 
@@ -409,7 +409,7 @@ end
 function handleDynamicEnum<T, G>(pseudo: CanBeState<T>, options: { [T]: State<G> }): State<G>
 	local state = pseudo :: any
 
-	if state.Get == nil then
+	if type(state) == "string" then
 		return options[state]
 	else
 		return ColdFusion.Computed(function(key: T): G
@@ -613,13 +613,13 @@ function Guide.getReadableColor(
 	return finalColor or color
 end
 
-local proxy = ServiceProxy(function()
-	return currentGuide or Guide
-end)
-
 function Guide.init(maid: Maid)
-	maid:GiveTask(Guide.new())
+	if not currentGuide then
+		maid:GiveTask(Guide.new())
+	end
 	return nil
 end
 
-return proxy
+return ServiceProxy(function()
+	return currentGuide or Guide
+end)

@@ -69,15 +69,9 @@ GuiLibrary.Sound = {
 	Unlock = LockSounds:WaitForChild("B") :: Sound,
 }
 
-local currentGuiLibrary: GuiLibrary = nil :: any
-
 function GuiLibrary:Destroy()
 	if not self._IsAlive then
 		return
-	end
-
-	if currentGuiLibrary == self then
-		currentGuiLibrary = nil :: any
 	end
 
 	self._IsAlive = false
@@ -109,25 +103,23 @@ function GuiLibrary.new(maid: Maid): GuiLibrary
 	self.Input = Input.new(maid)
 	self.Effect = Effect.new(maid)
 
-	if currentGuiLibrary then
-		currentGuiLibrary:Destroy()
-	end
-	currentGuiLibrary = self
-
 	return self
 end
-
+local isInitialized = false
 function GuiLibrary.init(maid: Maid)
-	local gui = GuiLibrary.new(maid)
-	local packageFolder = ReplicatedStorage:FindFirstChild("Packages")
-	if packageFolder then
-		if packageFolder:FindFirstChild("StyleGuide") then
-			gui:SetStyleGuide(require(packageFolder:FindFirstChild("StyleGuide") :: any) :: any)
+	if not isInitialized then
+		isInitialized = true
+		ModuleProvider.StyleGuide.init(maid)
+		local packageFolder = ReplicatedStorage:FindFirstChild("Packages")
+		if packageFolder then
+			if packageFolder:FindFirstChild("StyleGuide") then
+				local styleGuide = require(packageFolder:FindFirstChild("StyleGuide") :: any)
+				styleGuide.init(maid)
+				ModuleProvider.Override.StyleGuide = styleGuide
+			end
 		end
 	end
 	return nil
 end
 
-return ServiceProxy(function()
-	return currentGuiLibrary or GuiLibrary
-end)
+return GuiLibrary

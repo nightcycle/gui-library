@@ -30,8 +30,12 @@ local Util = {
 
 local PackageFolder = ReplicatedStorage:FindFirstChild("Packages")
 if PackageFolder then
-	Util.Override.StyleGuide = PackageFolder:FindFirstChild("StyleGuide") :: any
-	Util.Override.StyleGuide = PackageFolder:FindFirstChild("PseudoEnum") :: any
+	if PackageFolder:FindFirstChild("StyleGuide") then
+		Util.Override.StyleGuide = require(PackageFolder:FindFirstChild("StyleGuide")) :: any
+	end
+	if PackageFolder:FindFirstChild("PseudoEnum") then
+		Util.Override.PseudoEnum = require(PackageFolder:FindFirstChild("PseudoEnum")) :: any
+	end
 end
 
 Util.StyleGuide = ServiceProxy(function()
