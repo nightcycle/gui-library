@@ -488,7 +488,7 @@ function Layout:GetContainer(
 	end
 
 	if density then
-		local padding = self:GetUIPadding(density)
+		local padding = self:GetUIPadding(density, true)
 		padding.Parent = frame
 	end
 
