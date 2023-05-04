@@ -86,8 +86,9 @@ function Checkbox:GetState(
 	local _Computed = _fuse.Computed
 
 	local BorderColor3 = StyleGuide:GetContrastColor(backgroundPalette or PseudoEnum.GuiColorPalette.Surface1)
-	local BackgroundColor3 = StyleGuide:GetColor(palette or PseudoEnum.GuiColorPalette.Primary1)
 	local TextColor3 = StyleGuide:GetContrastColor(palette or PseudoEnum.GuiColorPalette.Primary1)
+	local BackgroundColor3 = StyleGuide:GetColor(palette or PseudoEnum.GuiColorPalette.Primary1)
+
 	local Output = _synth("Checkbox")({
 		Value = value,
 		Scale = _Computed(function(txtSize: number)

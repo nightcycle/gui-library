@@ -240,6 +240,7 @@ function Guide.new(): StyleGuide
 	local Secondary = _Value(SECONDARY_DEFAULT_COLOR)
 	local Tertiary = _Value(TERTIARY_DEFAULT_COLOR)
 	local Background = _Value(BACKGROUND_DEFAULT_COLOR)
+	local IsDarkMode = _Value(true)
 	local AbsoluteBackground = _Computed(function(background: Color3, isDarkMode: boolean)
 		local h, s, v = background:ToHSV()
 		if isDarkMode then
@@ -247,7 +248,6 @@ function Guide.new(): StyleGuide
 		end
 		return background
 	end, Background, IsDarkMode)
-	local IsDarkMode = _Value(true)
 
 	local ViewportSize = _Value(workspace.CurrentCamera.ViewportSize)
 	maid:GiveTask(RunService.RenderStepped:Connect(function()
