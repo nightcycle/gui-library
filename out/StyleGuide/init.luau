@@ -244,7 +244,7 @@ function Guide.new(): StyleGuide
 	local AbsoluteBackground = _Computed(function(background: Color3, isDarkMode: boolean)
 		local h, s, v = background:ToHSV()
 		if isDarkMode then
-			background = Color3.fromHSV(h, s, 0.05 + 0.15 * v)
+			background = Color3.fromHSV(h, s, 0.025 + 0.025 * v)
 		end
 		return background
 	end, Background, IsDarkMode)
