@@ -23,19 +23,6 @@ export type GuiAlignmentType = ("Center"
 local GuiAlignmentTypeList =
 	{ "Center", "Left", "Right", "Top", "Bottom", "TopLeft", "TopRight", "BottomLeft", "BottomRight" }
 
-export type GuiCategoryType = ("Background"
- | "Panel"
- | "Card"
- | "Frame"
- | "Item"
- | "Button"
- | "Label"
- | "Bar"
- | "Toggle"
-)
-
-local GuiCategoryTypeList = { "Background", "Panel", "Card", "Frame", "Item", "Button", "Label", "Bar", "Toggle" }
-
 export type GuiColorPalette = ("Primary1"
  | "Primary2"
  | "Primary3"
@@ -184,13 +171,26 @@ local GuiTypographyList = {
 	"Headline2",
 	"Headline1",
 }
+
+export type GuiCategoryType = ("Background"
+ | "Panel"
+ | "Card"
+ | "Frame"
+ | "Item"
+ | "Button"
+ | "Label"
+ | "Bar"
+ | "Toggle"
+)
+
+local GuiCategoryTypeList = { "Background", "Panel", "Card", "Frame", "Item", "Button", "Label", "Bar", "Toggle" }
 export type EnumName = ("ContrastStandardType"
  | "GuiAlignmentType"
- | "GuiCategoryType"
  | "GuiColorPalette"
  | "GuiDensityModifier"
  | "GuiThemeType"
  | "GuiTypography"
+ | "GuiCategoryType"
 )
 return {
 	getEnumItems = function(enumName: EnumName): { [number]: string }
@@ -198,8 +198,6 @@ return {
 			return table.clone(ContrastStandardTypeList)
 		elseif enumName == "GuiAlignmentType" then
 			return table.clone(GuiAlignmentTypeList)
-		elseif enumName == "GuiCategoryType" then
-			return table.clone(GuiCategoryTypeList)
 		elseif enumName == "GuiColorPalette" then
 			return table.clone(GuiColorPaletteList)
 		elseif enumName == "GuiDensityModifier" then
@@ -208,6 +206,8 @@ return {
 			return table.clone(GuiThemeTypeList)
 		elseif enumName == "GuiTypography" then
 			return table.clone(GuiTypographyList)
+		elseif enumName == "GuiCategoryType" then
+			return table.clone(GuiCategoryTypeList)
 		end
 		error("bad enum name: " .. tostring(enumName))
 	end,
@@ -221,12 +221,6 @@ return {
 		elseif enumName == "GuiAlignmentType" then
 			if GuiAlignmentTypeList[value] then
 				return GuiAlignmentTypeList[value]
-			else
-				error("no enum item of value " .. tostring(value) .. " in enum " .. tostring(enumName))
-			end
-		elseif enumName == "GuiCategoryType" then
-			if GuiCategoryTypeList[value] then
-				return GuiCategoryTypeList[value]
 			else
 				error("no enum item of value " .. tostring(value) .. " in enum " .. tostring(enumName))
 			end
@@ -254,6 +248,12 @@ return {
 			else
 				error("no enum item of value " .. tostring(value) .. " in enum " .. tostring(enumName))
 			end
+		elseif enumName == "GuiCategoryType" then
+			if GuiCategoryTypeList[value] then
+				return GuiCategoryTypeList[value]
+			else
+				error("no enum item of value " .. tostring(value) .. " in enum " .. tostring(enumName))
+			end
 		end
 		error("bad enum name: " .. tostring(enumName))
 	end,
@@ -274,14 +274,6 @@ return {
 				return index
 			else
 				error("no enumItem " .. enumItem .. " in GuiAlignmentType")
-			end
-		elseif enumName == "GuiCategoryType" then
-			local index = table.find(GuiCategoryTypeList, enumItem)
-			if index then
-				assert(index)
-				return index
-			else
-				error("no enumItem " .. enumItem .. " in GuiCategoryType")
 			end
 		elseif enumName == "GuiColorPalette" then
 			local index = table.find(GuiColorPaletteList, enumItem)
@@ -315,6 +307,14 @@ return {
 			else
 				error("no enumItem " .. enumItem .. " in GuiTypography")
 			end
+		elseif enumName == "GuiCategoryType" then
+			local index = table.find(GuiCategoryTypeList, enumItem)
+			if index then
+				assert(index)
+				return index
+			else
+				error("no enumItem " .. enumItem .. " in GuiCategoryType")
+			end
 		end
 		error("bad enum name: " .. tostring(enumName))
 	end,
@@ -334,17 +334,6 @@ return {
 		["TopRight"] = "TopRight" :: GuiAlignmentType,
 		["BottomLeft"] = "BottomLeft" :: GuiAlignmentType,
 		["BottomRight"] = "BottomRight" :: GuiAlignmentType,
-	},
-	GuiCategoryType = {
-		["Background"] = "Background" :: GuiCategoryType,
-		["Panel"] = "Panel" :: GuiCategoryType,
-		["Card"] = "Card" :: GuiCategoryType,
-		["Frame"] = "Frame" :: GuiCategoryType,
-		["Item"] = "Item" :: GuiCategoryType,
-		["Button"] = "Button" :: GuiCategoryType,
-		["Label"] = "Label" :: GuiCategoryType,
-		["Bar"] = "Bar" :: GuiCategoryType,
-		["Toggle"] = "Toggle" :: GuiCategoryType,
 	},
 	GuiColorPalette = {
 		["Primary1"] = "Primary1" :: GuiColorPalette,
@@ -421,5 +410,16 @@ return {
 		["Headline3"] = "Headline3" :: GuiTypography,
 		["Headline2"] = "Headline2" :: GuiTypography,
 		["Headline1"] = "Headline1" :: GuiTypography,
+	},
+	GuiCategoryType = {
+		["Background"] = "Background" :: GuiCategoryType,
+		["Panel"] = "Panel" :: GuiCategoryType,
+		["Card"] = "Card" :: GuiCategoryType,
+		["Frame"] = "Frame" :: GuiCategoryType,
+		["Item"] = "Item" :: GuiCategoryType,
+		["Button"] = "Button" :: GuiCategoryType,
+		["Label"] = "Label" :: GuiCategoryType,
+		["Bar"] = "Bar" :: GuiCategoryType,
+		["Toggle"] = "Toggle" :: GuiCategoryType,
 	},
 }

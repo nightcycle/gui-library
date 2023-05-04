@@ -42,14 +42,14 @@ local MIN_HEX_DIFFERENCE = 100 / 255
 local BLACK_COLOR = Color3.fromHex("#000")
 local WHITE_COLOR = Color3.fromHex("#FFF")
 
-local GAIN_COLOR = Color3.fromHex("#33cc33")
-local LOSS_COLOR = Color3.fromHex("#ff0000")
-local WARN_COLOR = Color3.fromHex("#ffbf00")
+local GAIN_COLOR = Color3.fromHex("#29c000")
+local LOSS_COLOR = Color3.fromHex("#f30025")
+local WARN_COLOR = Color3.fromHex("#ff930d")
 local ERROR_COLOR = Color3.fromHex("#ff0000")
-local PRIMARY_DEFAULT_COLOR = Color3.fromHex("#0088ff")
-local SECONDARY_DEFAULT_COLOR = Color3.fromHex("#ffbb00")
-local TERTIARY_DEFAULT_COLOR = Color3.fromHex("#68ffeb")
-local BACKGROUND_DEFAULT_COLOR = Color3.fromHex("#000000")
+local PRIMARY_DEFAULT_COLOR = Color3.fromHex("#2b7bff")
+local SECONDARY_DEFAULT_COLOR = Color3.fromHex("#ffd398")
+local TERTIARY_DEFAULT_COLOR = Color3.fromHex("#00cbfc")
+local BACKGROUND_DEFAULT_COLOR = Color3.fromHex("#c5dcff")
 
 local VALUE_RANGE = 0.3
 local VALUE_BUFFER = 0.05
@@ -84,7 +84,6 @@ local STYLE_VARIANT_COUNTS = {
 }
 
 -- modifiers
-
 type Typography = {
 	Font: Font,
 	Scale: number,
@@ -97,57 +96,57 @@ type Paddings = {
 
 local Typography: { [GuiTypography]: Typography } = {
 	Headline1 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Highway", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 6.0,
 		TextWrapped = true,
 	},
 	Headline2 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Highway", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 4.0,
 		TextWrapped = true,
 	},
 	Headline3 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Highway", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 3.5,
 		TextWrapped = false,
 	},
 	Headline4 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Highway", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 3.0,
 		TextWrapped = false,
 	},
 	Headline5 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Highway", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 2.75,
 		TextWrapped = false,
 	},
 	Headline6 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Highway", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 2.5,
 		TextWrapped = false,
 	},
 	Subtitle1 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Highway", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 2.25,
 		TextWrapped = false,
 	},
 	Subtitle2 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Highway", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 2.0,
 		TextWrapped = false,
 	},
 	Button = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Gotham", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 1.875,
 		TextWrapped = false,
 	},
 	Body1 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Gotham", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 1.5,
 		TextWrapped = false,
 	},
 	Body2 = {
-		Font = Font.fromName("Arial", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+		Font = Font.fromName("Gotham", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
 		Scale = 1.375,
 		TextWrapped = false,
 	},
@@ -171,12 +170,22 @@ local Paddings: Paddings = {
 
 export type StyleGuide = {
 	__index: StyleGuide,
-	Maid: Maid,
-	new: (config: { [string]: any }?) -> StyleGuide,
-	init: (maid: Maid) -> nil,
-	getReadableColor: (color: Color3, background: Color3, contrastStandard: ContrastStandardType?) -> Color3,
-	checkContrast: (color: Color3, background: Color3, contrastStandard: ContrastStandardType) -> boolean,
-	getContrastRatio: (color: Color3, background: Color3) -> number,
+	_IsAlive: boolean,
+	_Maid: Maid,
+	_MinimumPaddingSize: State<number>,
+	_Typography: State<{ [GuiTypography]: Typography }>,
+	_Paddings: State<{ [GuiDensityModifier]: number }>,
+	_Palette: State<{ [GuiColorPalette]: Color3 }>,
+	_Colors: { [GuiColorPalette]: State<Color3> },
+	_ContrastColors: { [GuiColorPalette]: State<Color3> },
+	_FullContrastColors: { [GuiColorPalette]: { [GuiColorPalette]: State<Color3> } },
+	_TextSizeStates: { [GuiThemeType]: State<number> },
+	_TextWrapStates: { [GuiThemeType]: State<boolean> },
+	_TextFontStates: { [GuiThemeType]: State<Font> },
+	_PaddingStates: { [GuiDensityModifier]: State<UDim> },
+	_AbsoluteBackground: State<Color3>,
+
+	Scale: ValueState<number>,
 	IsDarkMode: ValueState<boolean>,
 	Primary: ValueState<Color3>,
 	Secondary: ValueState<Color3>,
@@ -188,32 +197,26 @@ export type StyleGuide = {
 	BorderSizePixel: State<number>,
 	ViewportSize: State<Vector2>,
 
-	_MinimumPaddingSize: State<number>,
-	_Typography: State<GuiTypography>,
-	_Paddings: State<{ [GuiDensityModifier]: number }>,
-	_Palette: State<{ [GuiColorPalette]: Color3 }>,
-	_Colors: { [GuiColorPalette]: State<Color3> },
-	_ContrastColors: { [GuiColorPalette]: State<Color3> },
-	_FullContrastColors: { [GuiColorPalette]: { [GuiColorPalette]: State<Color3> } },
-	_TextSizeStates: { [GuiThemeType]: State<number> },
-	_TextWrapStates: { [GuiThemeType]: State<boolean> },
-	_TextFontStates: { [GuiThemeType]: State<Font> },
-	_PaddingStates: { [GuiDensityModifier]: State<UDim> },
 	Destroy: (self: StyleGuide) -> nil,
-
 	GetPadding: (StyleGuide, CanBeState<GuiDensityModifier>) -> State<UDim>,
 	GetTextSize: (StyleGuide, CanBeState<GuiTypography>) -> State<number>,
 	GetTextWrapped: (StyleGuide, CanBeState<GuiTypography>) -> State<boolean>,
 	GetFont: (StyleGuide, CanBeState<GuiTypography>) -> State<Font>,
 	GetColor: (StyleGuide, CanBeState<GuiColorPalette>) -> State<Color3>,
 	GetContrastColor: (StyleGuide, CanBeState<GuiColorPalette>, CanBeState<GuiColorPalette>?) -> State<Color3>,
+
+	new: (config: { [string]: any }?) -> StyleGuide,
+	init: (maid: Maid) -> nil,
+	getReadableColor: (color: Color3, background: Color3, contrastStandard: ContrastStandardType?) -> Color3,
+	checkContrast: (color: Color3, background: Color3, contrastStandard: ContrastStandardType) -> boolean,
+	getContrastRatio: (color: Color3, background: Color3) -> number,
 	[any]: nil,
 }
 local Guide: StyleGuide = {} :: any
 Guide.__index = Guide
 
 function Guide:Destroy()
-	self.Maid:Destroy()
+	self._Maid:Destroy()
 	local t: any = self
 	for k, v in pairs(t) do
 		t[k] = nil
@@ -225,8 +228,8 @@ end
 local currentGuide: StyleGuide
 
 function Guide.new(): StyleGuide
-	local _maid = Maid.new()
-	local _fuse = ColdFusion.fuse(_maid)
+	local maid = Maid.new()
+	local _fuse = ColdFusion.fuse(maid)
 	local _import = _fuse.import
 	local _new = _fuse.new
 
@@ -237,9 +240,17 @@ function Guide.new(): StyleGuide
 	local Secondary = _Value(SECONDARY_DEFAULT_COLOR)
 	local Tertiary = _Value(TERTIARY_DEFAULT_COLOR)
 	local Background = _Value(BACKGROUND_DEFAULT_COLOR)
+	local AbsoluteBackground = _Computed(function(background: Color3, isDarkMode: boolean)
+		local h, s, v = background:ToHSV()
+		if isDarkMode then
+			background = Color3.fromHSV(h, s, 0.05 + 0.15 * v)
+		end
+		return background
+	end, Background, IsDarkMode)
+	local IsDarkMode = _Value(true)
 
 	local ViewportSize = _Value(workspace.CurrentCamera.ViewportSize)
-	_maid:GiveTask(RunService.RenderStepped:Connect(function()
+	maid:GiveTask(RunService.RenderStepped:Connect(function()
 		ViewportSize:Set(workspace.CurrentCamera.ViewportSize)
 	end))
 
@@ -312,43 +323,46 @@ function Guide.new(): StyleGuide
 		Primary,
 		Secondary,
 		Tertiary,
-		Background
+		AbsoluteBackground
 	)
-	local MinTextSize = _Computed(function(vSize: Vector2): number
-		return math.max(math.ceil(0.0075 * vSize.Y), ABS_MIN_TEXT_SIZE)
-	end, ViewportSize)
-	local MinimumTextSizeTween = MinTextSize:Tween()
 
-	local self: StyleGuide = setmetatable({
-		Primary = Primary,
-		Secondary = Secondary,
-		Tertiary = Tertiary,
-		IsDarkMode = _Value(true),
-		Background = Background,
-		Maid = _maid,
-		_Paddings = _Value(Paddings),
-		_Typography = _Value(Typography) :: State<{ [GuiThemeType]: Typography }>,
-		_MinimumPaddingSize = _Computed(function(minTextSize: number): number
-			return math.max(math.ceil(minTextSize * 0.75), 1)
-		end, MinimumTextSizeTween),
-		MinimumTextSize = MinTextSize,
-		ViewportSize = ViewportSize,
-		_Palette = Palette,
-		CornerRadius = _Computed(function(minTextSize: number)
-			minTextSize = math.max(math.round(minTextSize * 0.5), 1) :: number
-			return UDim.new(0, minTextSize)
-		end, MinimumTextSizeTween),
-		BorderSizePixel = _Computed(function(minTextSize: number)
-			return math.max(math.round(minTextSize * 0.25), 1)
-		end, MinimumTextSizeTween),
-		_Colors = {} :: { [GuiColorPalette]: State<Color3>? },
-		_ContrastColors = {} :: { [GuiColorPalette]: State<Color3>? },
-		_FullContrastColors = {},
-		_TextSizeStates = {} :: { [GuiThemeType]: State<number>? },
-		_TextWrapStates = {} :: { [GuiThemeType]: State<boolean>? },
-		_TextFontStates = {} :: { [GuiThemeType]: State<Font>? },
-		_PaddingStates = {} :: { [GuiDensityModifier]: State<UDim>? },
-	}, Guide) :: any
+	local Scale = _Value(1)
+	local MinimumTextSize = _Computed(function(vSize: Vector2, scale: number): number
+		return math.max(math.ceil(0.0075 * vSize.Y * scale), math.ceil(ABS_MIN_TEXT_SIZE * scale))
+	end, ViewportSize, Scale:Tween())
+
+	local self: StyleGuide = setmetatable({}, Guide) :: any
+	self._IsAlive = true
+	self.Primary = Primary
+	self.Secondary = Secondary
+	self.Tertiary = Tertiary
+	self.IsDarkMode = IsDarkMode
+	self.Background = Background
+	self._AbsoluteBackground = AbsoluteBackground
+	self.Scale = Scale
+	self.ViewportSize = ViewportSize
+	self.CornerRadius = _Computed(function(minTextSize: number)
+		minTextSize = math.max(math.round(minTextSize * 0.5), 1) :: number
+		return UDim.new(0, minTextSize)
+	end, MinimumTextSize)
+	self.BorderSizePixel = _Computed(function(minTextSize: number)
+		return math.max(math.round(minTextSize * 0.25), 1)
+	end, MinimumTextSize)
+	self._Maid = maid
+	self._Paddings = _Value(Paddings)
+	self._Typography = _Value(Typography)
+	self._MinimumPaddingSize = _Computed(function(minTextSize: number): number
+		return math.max(math.ceil(minTextSize * 0.75), 1)
+	end, MinimumTextSize)
+	self._MinimumTextSize = MinimumTextSize
+	self._Palette = Palette
+	self._Colors = {}
+	self._ContrastColors = {}
+	self._FullContrastColors = {}
+	self._TextSizeStates = {}
+	self._TextWrapStates = {}
+	self._TextFontStates = {}
+	self._PaddingStates = {}
 
 	for i, enumItem in ipairs(PseudoEnum.getEnumItems("GuiColorPalette")) do
 		self._Colors[enumItem] = _Computed(function(palette)
@@ -388,7 +402,7 @@ function Guide.new(): StyleGuide
 			self._TextFontStates[enumItem] = TextFontState
 		end
 		return nil
-	end, self._Typography, MinimumTextSizeTween)
+	end, self._Typography, MinimumTextSize)
 
 	_Computed(function(paddings: Paddings, minTextSize: number)
 		for enumItem, val: number in pairs(paddings) do
@@ -398,7 +412,7 @@ function Guide.new(): StyleGuide
 			self._PaddingStates[enumItem] = PaddingState
 		end
 		return nil
-	end, self._Paddings, MinimumTextSizeTween)
+	end, self._Paddings, MinimumTextSize)
 
 	setmetatable(self, Guide)
 
@@ -410,7 +424,7 @@ function handleDynamicEnum<T, G>(pseudo: CanBeState<T>, options: { [T]: State<G>
 	local state = pseudo :: any
 
 	if type(state) == "string" then
-		return options[state]
+		return options[state :: any]
 	else
 		return ColdFusion.Computed(function(key: T): G
 			local vals = {}

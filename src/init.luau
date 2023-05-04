@@ -9,7 +9,6 @@ local Maid = require(Packages:WaitForChild("Maid"))
 local Signal = require(Packages:WaitForChild("Signal"))
 local Synthetic = require(Packages:WaitForChild("Synthetic"))
 local ColdFusion = require(Packages:WaitForChild("ColdFusion"))
-local ServiceProxy = require(Packages:WaitForChild("ServiceProxy"))
 
 -- Modules
 local Visualization = require(script:WaitForChild("Visualization"))
@@ -24,9 +23,9 @@ type Maid = Maid.Maid
 type Signal = Signal.Signal
 type Synth = Synthetic.Synthetic
 type State<T> = ColdFusion.State<T>
-type StyleGuide = ModuleProvider.StyleGuide
 type ValueState<T> = ColdFusion.ValueState<T>
 type CanBeState<T> = ColdFusion.CanBeState<T>
+export type StyleGuide = ModuleProvider.StyleGuide
 export type ContrastStandardType = ModuleProvider.ContrastStandardType
 export type GuiAlignmentType = ModuleProvider.GuiAlignmentType
 export type GuiCategoryType = ModuleProvider.GuiCategoryType
@@ -46,8 +45,8 @@ export type GuiLibrary = {
 	Destroy: (self: GuiLibrary) -> nil,
 	new: (maid: Maid) -> GuiLibrary,
 	init: (maid: Maid) -> nil,
-	SetStyleGuide: (self: GuiLibrary, styleGuide: StyleGuide) -> nil,
-	GetStyleGuide: (self: GuiLibrary) -> StyleGuide,
+	setStyleGuide: (styleGuide: StyleGuide) -> nil,
+	getStyleGuide: () -> StyleGuide,
 	Sound: {
 		Click: Sound,
 		Lock: Sound,
@@ -84,14 +83,6 @@ function GuiLibrary:Destroy()
 	return nil
 end
 
-function GuiLibrary:SetStyleGuide(styleGuide: StyleGuide)
-	ModuleProvider.Override.StyleGuide = styleGuide
-	return nil
-end
-
-function GuiLibrary:GetStyleGuide(): StyleGuide
-	return ModuleProvider.StyleGuide
-end
 
 function GuiLibrary.new(maid: Maid): GuiLibrary
 	local self: GuiLibrary = setmetatable({}, GuiLibrary) :: any
@@ -105,19 +96,34 @@ function GuiLibrary.new(maid: Maid): GuiLibrary
 
 	return self
 end
+
+function GuiLibrary.setStyleGuide(styleGuide: StyleGuide)
+	ModuleProvider.Override.StyleGuide = styleGuide
+	return nil
+end
+
+function GuiLibrary.getStyleGuide(): StyleGuide
+	return ModuleProvider.StyleGuide
+end
+
 local isInitialized = false
 function GuiLibrary.init(maid: Maid)
 	if not isInitialized then
 		isInitialized = true
 		ModuleProvider.StyleGuide.init(maid)
-		local packageFolder = ReplicatedStorage:FindFirstChild("Packages")
-		if packageFolder then
-			if packageFolder:FindFirstChild("StyleGuide") then
-				local styleGuide = require(packageFolder:FindFirstChild("StyleGuide") :: any)
-				styleGuide.init(maid)
-				ModuleProvider.Override.StyleGuide = styleGuide
+		
+		local function attemptModule(folder: Instance?)
+			if folder then
+				if folder:FindFirstChild("StyleGuide") then
+					local styleGuide = require(folder:FindFirstChild("StyleGuide") :: any) :: any
+					styleGuide.init(maid)
+					ModuleProvider.Override.StyleGuide = styleGuide
+				end
 			end
 		end
+		attemptModule(ReplicatedStorage:FindFirstChild("Packages"))
+		attemptModule(ReplicatedStorage:FindFirstChild("Shared"))
+		attemptModule(ReplicatedStorage:FindFirstChild("Client"))
 	end
 	return nil
 end

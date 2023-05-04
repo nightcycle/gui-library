@@ -78,7 +78,7 @@ local function newChip(
 	SelBackColor: State<Color3>,
 	SelTextColor: State<Color3>,
 	TextSize: State<number>,
-	FontFace: State<Enum.Font>,
+	FontFace: State<Font>,
 	Sound: State<Sound>
 )
 	local _fuse = ColdFusion.fuse(maid)

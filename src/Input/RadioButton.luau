@@ -91,7 +91,7 @@ function RadioButton:GetState(
 	local Output = _synth("RadioButton")({
 		Value = value,
 		Scale = _Computed(function(txtSize: number)
-			return txtSize / 12
+			return txtSize / 15
 		end, StyleGuide:GetTextSize((typography or PseudoEnum.GuiTypography.Button) :: any)),
 
 		BorderColor3 = backgroundColor3,

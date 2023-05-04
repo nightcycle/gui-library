@@ -1,7 +1,5 @@
 --!strict
 -- Services
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 -- Packages
 local Package = script.Parent
 assert(Package)
@@ -27,16 +25,6 @@ local Util = {
 		PseudoEnum = nil :: PseudoEnums?,
 	},
 }
-
-local PackageFolder = ReplicatedStorage:FindFirstChild("Packages")
-if PackageFolder then
-	if PackageFolder:FindFirstChild("StyleGuide") then
-		Util.Override.StyleGuide = require(PackageFolder:FindFirstChild("StyleGuide")) :: any
-	end
-	if PackageFolder:FindFirstChild("PseudoEnum") then
-		Util.Override.PseudoEnum = require(PackageFolder:FindFirstChild("PseudoEnum")) :: any
-	end
-end
 
 Util.StyleGuide = ServiceProxy(function()
 	return (Util.Override.StyleGuide or StyleGuide) :: StyleGuide

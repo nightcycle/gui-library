@@ -91,7 +91,7 @@ function Switch:GetState(
 	local Output = _synth("Switch")({
 		Value = value,
 		Scale = _Computed(function(txtSize: number)
-			return txtSize / 12
+			return txtSize / 15
 		end, StyleGuide:GetTextSize((typography or PseudoEnum.GuiTypography.Button) :: any)),
 		BackgroundColor3 = backgroundColor3,
 		EnabledColor3 = enabledColor3,

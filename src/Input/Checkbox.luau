@@ -91,7 +91,7 @@ function Checkbox:GetState(
 	local Output = _synth("Checkbox")({
 		Value = value,
 		Scale = _Computed(function(txtSize: number)
-			return txtSize / 10
+			return txtSize / 15
 		end, StyleGuide:GetTextSize((typography or PseudoEnum.GuiTypography.Button) :: any)),
 		BackgroundColor3 = BackgroundColor3,
 		BorderColor3 = BorderColor3,
