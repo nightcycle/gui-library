@@ -146,6 +146,10 @@ return function(maid: Maid)
 			return val
 		end, if hasDestructor then possibleDestructor else function() end)
 
+		for i, dependency in ipairs(paramStates) do
+			dependency.dependentSet[compState] = true
+		end
+
 		return Interface._init(compState, _FusionComputed) :: any
 	end
 
