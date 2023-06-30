@@ -442,9 +442,9 @@ function handleDoubleDynamicEnum<T, G>(
 ): State<G>
 	local state1 = pseudo1 :: any
 	local state2 = pseudo2 :: any
-	if state1.EnumType ~= nil and state2.EnumType ~= nil then
-		return options[state1][state2]
-	elseif state1.EnumType == nil and state2.EnumType == nil then
+	if typeof(state1) == "string" and typeof(state2) == "string" then
+		return options[state1 :: any][state2 :: any]
+	elseif typeof(state1) ~= "string" and typeof(state2) ~= "string" then
 		return ColdFusion.Computed(function(key1: T, key2: T): G
 			local vals = {}
 			for k1, v1: { [T]: State<G> } in pairs(options) do
@@ -455,7 +455,7 @@ function handleDoubleDynamicEnum<T, G>(
 			end
 			return vals[key1][key2]
 		end, state1, state2)
-	elseif state1.EnumType == nil then
+	elseif typeof(state1) ~= "string" then
 		return ColdFusion.Computed(function(key1: T): G
 			local vals = {}
 			for k1, v1: { [T]: State<G> } in pairs(options) do
@@ -466,7 +466,7 @@ function handleDoubleDynamicEnum<T, G>(
 			end
 			return vals[key1][state2]
 		end, state1)
-	elseif state2.EnumType == nil then
+	elseif typeof(state2) ~= "string" then
 		return ColdFusion.Computed(function(key2: T): G
 			local vals = {}
 			for k1, v1: { [T]: State<G> } in pairs(options) do
@@ -476,7 +476,7 @@ function handleDoubleDynamicEnum<T, G>(
 				end
 			end
 			return vals[state1][key2]
-		end, state2)
+		end, state2) :: any
 	end
 	error("Bad params")
 end
