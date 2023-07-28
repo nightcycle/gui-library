@@ -89,7 +89,7 @@ return function(
 	backgroundColorPalette: ModuleProvider.GuiColorPalette,
 	guiTypography: ModuleProvider.GuiTypography,
 	guiDensity: ModuleProvider.GuiDensityModifier,
-	columnData: { [number]: ColumnData },
+	columnDataList: { [number]: ColumnData },
 	HeaderWidths: State<{ [string]: number }>
 ): ValueState<Frame?>
 	local _fuse = ColdFusion.fuse(maid)
@@ -119,7 +119,7 @@ return function(
 		} :: { [number]: any },
 	}) :: Frame)
 
-	for i, columnData in ipairs(columnData) do
+	for i, columnData in ipairs(columnDataList) do
 		getHeaderCell(
 			maid,
 			i,

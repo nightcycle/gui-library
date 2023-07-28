@@ -109,16 +109,16 @@ local function newLine(
 	local Start: State<DataPoint> = _import(start, emptyDataPoint())
 	local Finish: State<DataPoint> = _import(finish, emptyDataPoint())
 
-	local DeltaX = _Computed(function(finish: DataPoint, start: DataPoint)
-		return finish.Value.X - start.Value.X
+	local DeltaX = _Computed(function(finishPoint: DataPoint, startPoint: DataPoint)
+		return finishPoint.Value.X - startPoint.Value.X
 	end, Finish, Start)
 
-	local DeltaY = _Computed(function(finish: DataPoint, start: DataPoint)
-		return (1 - finish.Value.Y) - (1 - start.Value.Y)
+	local DeltaY = _Computed(function(finishPoint: DataPoint, startPoint: DataPoint)
+		return (1 - finishPoint.Value.Y) - (1 - startPoint.Value.Y)
 	end, Finish, Start)
 
-	local Length = _Computed(function(finish: DataPoint, start: DataPoint)
-		return (finish.Value - start.Value).Magnitude
+	local Length = _Computed(function(finishPoint: DataPoint, startPoint: DataPoint)
+		return (finishPoint.Value - startPoint.Value).Magnitude
 	end, Finish, Start)
 	local Angle = _Computed(function(deltaX: number, deltaY: number)
 		return math.deg(math.atan2(deltaY, deltaX))
@@ -132,8 +132,8 @@ local function newLine(
 		ZIndex = 9,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color,
-		Position = _Computed(function(start: DataPoint, deltaX: number, deltaY: number)
-			return UDim2.fromScale(start.Value.X + deltaX * 0.5, 1 - start.Value.Y + deltaY * 0.5)
+		Position = _Computed(function(startPoint: DataPoint, deltaX: number, deltaY: number)
+			return UDim2.fromScale(startPoint.Value.X + deltaX * 0.5, 1 - startPoint.Value.Y + deltaY * 0.5)
 		end, Start, DeltaX, DeltaY),
 		Size = _Computed(function(thickness: UDim, length: number)
 			return UDim2.new(UDim.new(length, 0), thickness)
@@ -424,9 +424,9 @@ return function(
 		return Vector2.new(maxX, maxY)
 	end, CompositeDataSet)
 
-	local Range = _Computed(function(start: Vector2, finish: Vector2)
+	local Range = _Computed(function(startCorner: Vector2, finishCorner: Vector2)
 		-- print("RANGE",finish - start )
-		return finish - start
+		return finishCorner - startCorner
 	end, StartCorner, FinishCorner)
 
 	local YLabelWidth = _Value(0)

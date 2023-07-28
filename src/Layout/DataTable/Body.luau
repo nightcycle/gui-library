@@ -86,7 +86,7 @@ local function buildRow(
 	entry: { [any]: any },
 	backgroundColorPalette: ModuleProvider.GuiColorPalette,
 	guiDensity: ModuleProvider.GuiDensityModifier,
-	columnData: { [number]: ColumnData },
+	columnDataList: { [number]: ColumnData },
 	Body: State<Frame?>,
 	HeaderWidths: State<{ [string]: number }>
 ): (number, Frame)
@@ -104,7 +104,7 @@ local function buildRow(
 	local ColumnPadding = StyleGuide:GetPadding(guiDensity)
 	local Size = _Computed(function(padding: UDim, widths: { [string]: number }): UDim2
 		local full = 0
-		for i, columnData in ipairs(columnData) do
+		for i, columnData in ipairs(columnDataList) do
 			local width = widths[columnData.Name]
 			if columnData.WidthWeight then
 				width *= columnData.WidthWeight
@@ -133,7 +133,7 @@ local function buildRow(
 
 	for k, val in pairs(entry) do
 		local specificColumnData: ColumnData? = nil
-		for i, columnData in ipairs(columnData) do
+		for i, columnData in ipairs(columnDataList) do
 			if columnData.Name == k then
 				specificColumnData = columnData
 			end
