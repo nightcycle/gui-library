@@ -64,14 +64,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
-      - name: Build style-guide
-        shell: bash
-        run: |
-          pseudo-enum build dev.project.json
-          style-guide build out/StyleGuide.luau -dark
-          py scripts/edit_style_guide.py
-          rojo sourcemap dev.project.json --output sourcemap.json
 
       # Install wally packages
       - name: update wally packages
@@ -85,6 +77,14 @@ jobs:
  
       - name: export wally package types
         run: wally-package-types --sourcemap sourcemap.json Packages
+      
+      - name: Build style-guide
+        shell: bash
+        run: |
+          pseudo-enum build dev.project.json
+          style-guide build out/StyleGuide.luau -dark
+          py scripts/edit_style_guide.py
+          rojo sourcemap dev.project.json --output sourcemap.json
 
       - name: Install testing files
         shell: bash
