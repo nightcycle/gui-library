@@ -1,4 +1,6 @@
 build_path = "out/PseudoEnum.luau"
+use_union_types_for_tree = true
+use_union_types_for_export = false
 
 [enums]
 ContrastStandardType = [ "Default", "LargeText", "Incidental", "Logotype",]

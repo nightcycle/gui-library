@@ -15,7 +15,7 @@ export type Signal = {
 export type SignalConnection = {
 	Connected: boolean,
 	Disconnect: (self: SignalConnection) -> nil,
-	new: (Signal, (() -> any?)) -> SignalConnection,
+	new: (Signal, () -> any?) -> SignalConnection,
 }
 
 -- License:                                                                   --
@@ -115,10 +115,7 @@ function Signal.new(): Signal
 end
 
 function Signal.Wrap(rbxScriptSignal)
-	assert(
-		typeof(rbxScriptSignal) == "RBXScriptSignal",
-		"Argument #1 to Signal.Wrap must be a RBXScriptSignal; got " .. typeof(rbxScriptSignal)
-	)
+	assert(typeof(rbxScriptSignal) == "RBXScriptSignal", "Argument #1 to Signal.Wrap must be a RBXScriptSignal; got " .. typeof(rbxScriptSignal))
 	local signal = Signal.new()
 	signal._proxyHandler = rbxScriptSignal:Connect(function(...)
 		signal:Fire(...)

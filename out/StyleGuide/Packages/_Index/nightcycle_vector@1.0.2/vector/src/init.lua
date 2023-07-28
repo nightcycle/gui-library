@@ -269,24 +269,8 @@ function Vector:Cross(other: Vector): Vector
 
 		assert(x1 ~= nil and x2 ~= nil and x3 ~= nil and x4 ~= nil and x5 ~= nil and x6 ~= nil and x7 ~= nil)
 		assert(y1 ~= nil and y2 ~= nil and y3 ~= nil and y4 ~= nil and y5 ~= nil and y6 ~= nil and y7 ~= nil)
-		assert(
-			typeof(x1) == "number"
-				and typeof(x2) == "number"
-				and typeof(x3) == "number"
-				and typeof(x4) == "number"
-				and typeof(x5) == "number"
-				and typeof(x6) == "number"
-				and typeof(x7) == "number"
-		)
-		assert(
-			typeof(y1) == "number"
-				and typeof(y2) == "number"
-				and typeof(y3) == "number"
-				and typeof(y4) == "number"
-				and typeof(y5) == "number"
-				and typeof(y6) == "number"
-				and typeof(y7) == "number"
-		)
+		assert(typeof(x1) == "number" and typeof(x2) == "number" and typeof(x3) == "number" and typeof(x4) == "number" and typeof(x5) == "number" and typeof(x6) == "number" and typeof(x7) == "number")
+		assert(typeof(y1) == "number" and typeof(y2) == "number" and typeof(y3) == "number" and typeof(y4) == "number" and typeof(y5) == "number" and typeof(y6) == "number" and typeof(y7) == "number")
 
 		local e1: number = (x2 * y4 - x4 * y2 + x3 * y7 - x7 * y3 + x5 * y6 + x6 * y6)
 		local e2: number = (x3 * y5 - x5 * y3 + x4 * y1 - x1 * y4 + x6 * y7 - x7 * y6)

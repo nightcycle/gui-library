@@ -5,9 +5,7 @@
 local MaidTaskUtils = {}
 
 function MaidTaskUtils.isValidTask(job): boolean
-	return type(job) == "function"
-		or typeof(job) == "RBXScriptConnection"
-		or type(job) == "table" and type(job.Destroy) == "function"
+	return type(job) == "function" or typeof(job) == "RBXScriptConnection" or type(job) == "table" and type(job.Destroy) == "function"
 end
 
 function MaidTaskUtils.doTask(job, key: any?): nil

@@ -26,7 +26,7 @@ export type GuiTypography = PseudoEnum.GuiTypography
 
 type State<T> = ColdFusion.State<T>
 type ValueState<T> = ColdFusion.ValueState<T>
-type CanBeState<T> = (State<T> | T)
+type CanBeState<T> = State<T> | T
 type Maid = Maid.Maid
 -- Constants
 local ABS_MIN_TEXT_SIZE = 8
@@ -254,77 +254,61 @@ function Guide.new(): StyleGuide
 		ViewportSize:Set(workspace.CurrentCamera.ViewportSize)
 	end))
 
-	local Palette = _Computed(
-		function(
-			primary: Color3,
-			secondary: Color3,
-			tertiary: Color3,
-			background: Color3
-		): { [PseudoEnum.GuiColorPalette]: Color3 }
-			local palette = {}
+	local Palette = _Computed(function(primary: Color3, secondary: Color3, tertiary: Color3, background: Color3): { [PseudoEnum.GuiColorPalette]: Color3 }
+		local palette = {}
 
-			local function getBrightness(elevation: number)
-				local maxElevation = ELEVATION_DATA[#ELEVATION_DATA]
-				return (elevation / maxElevation) ^ 0.5
-			end
+		local function getBrightness(elevation: number)
+			local maxElevation = ELEVATION_DATA[#ELEVATION_DATA]
+			return (elevation / maxElevation) ^ 0.5
+		end
 
-			for key: string, count in pairs(STYLE_VARIANT_COUNTS) do
-				for i = 1, count do
-					local enum: PseudoEnum.GuiColorPalette? =
-						PseudoEnum.GuiColorPalette[(key .. if count == 1 then "" else tostring(i)) :: any]
-					assert(enum)
+		for key: string, count in pairs(STYLE_VARIANT_COUNTS) do
+			for i = 1, count do
+				local enum: PseudoEnum.GuiColorPalette? = PseudoEnum.GuiColorPalette[(key .. if count == 1 then "" else tostring(i)) :: any]
+				assert(enum)
 
-					local h: number, s: number, v: number
-					if key == "Surface" then
-						h, s, v = background:ToHSV()
-					elseif key == "Primary" then
-						h, s, v = primary:ToHSV()
-					elseif key == "Secondary" then
-						h, s, v = secondary:ToHSV()
-					elseif key == "Tertiary" then
-						h, s, v = tertiary:ToHSV()
-					elseif key == "Warning" then
-						h, s, v = WARN_COLOR:ToHSV()
-					elseif key == "Loss" then
-						h, s, v = LOSS_COLOR:ToHSV()
-					elseif key == "Gain" then
-						h, s, v = GAIN_COLOR:ToHSV()
-					elseif key == "Dark" then
-						h, s, v = BLACK_COLOR:ToHSV()
-					elseif key == "Light" then
-						h, s, v = WHITE_COLOR:ToHSV()
-					else
-						h, s, v = ERROR_COLOR:ToHSV()
-					end
-
-					-- gets elevation level
-					local top = {
-						Saturation = math.max(0, s - SATURATION_RANGE),
-						Value = math.min(1 - VALUE_BUFFER, v + VALUE_RANGE),
-					}
-					local bottom = {
-						Saturation = math.min(1, top.Saturation + SATURATION_RANGE),
-						Value = math.max(VALUE_BUFFER, top.Value - VALUE_RANGE),
-					}
-					top.Saturation = bottom.Saturation - SATURATION_RANGE
-					top.Value = bottom.Value + VALUE_RANGE
-
-					local brightness = getBrightness(ELEVATION_DATA[i])
-
-					palette[enum] = Color3.fromHSV(
-						h,
-						CurveUtil.lerp(bottom.Saturation, top.Saturation, brightness),
-						CurveUtil.lerp(bottom.Value, top.Value, brightness)
-					)
+				local h: number, s: number, v: number
+				if key == "Surface" then
+					h, s, v = background:ToHSV()
+				elseif key == "Primary" then
+					h, s, v = primary:ToHSV()
+				elseif key == "Secondary" then
+					h, s, v = secondary:ToHSV()
+				elseif key == "Tertiary" then
+					h, s, v = tertiary:ToHSV()
+				elseif key == "Warning" then
+					h, s, v = WARN_COLOR:ToHSV()
+				elseif key == "Loss" then
+					h, s, v = LOSS_COLOR:ToHSV()
+				elseif key == "Gain" then
+					h, s, v = GAIN_COLOR:ToHSV()
+				elseif key == "Dark" then
+					h, s, v = BLACK_COLOR:ToHSV()
+				elseif key == "Light" then
+					h, s, v = WHITE_COLOR:ToHSV()
+				else
+					h, s, v = ERROR_COLOR:ToHSV()
 				end
+
+				-- gets elevation level
+				local top = {
+					Saturation = math.max(0, s - SATURATION_RANGE),
+					Value = math.min(1 - VALUE_BUFFER, v + VALUE_RANGE),
+				}
+				local bottom = {
+					Saturation = math.min(1, top.Saturation + SATURATION_RANGE),
+					Value = math.max(VALUE_BUFFER, top.Value - VALUE_RANGE),
+				}
+				top.Saturation = bottom.Saturation - SATURATION_RANGE
+				top.Value = bottom.Value + VALUE_RANGE
+
+				local brightness = getBrightness(ELEVATION_DATA[i])
+
+				palette[enum] = Color3.fromHSV(h, CurveUtil.lerp(bottom.Saturation, top.Saturation, brightness), CurveUtil.lerp(bottom.Value, top.Value, brightness))
 			end
-			return palette
-		end,
-		Primary,
-		Secondary,
-		Tertiary,
-		AbsoluteBackground
-	)
+		end
+		return palette
+	end, Primary, Secondary, Tertiary, AbsoluteBackground)
 
 	local Scale = _Value(1)
 	local MinimumTextSize = _Computed(function(vSize: Vector2, scale: number): number
@@ -435,11 +419,7 @@ function handleDynamicEnum<T, G>(pseudo: CanBeState<T>, options: { [T]: State<G>
 		end, state)
 	end
 end
-function handleDoubleDynamicEnum<T, G>(
-	pseudo1: CanBeState<T>,
-	pseudo2: CanBeState<T>,
-	options: { [T]: { [T]: State<G> } }
-): State<G>
+function handleDoubleDynamicEnum<T, G>(pseudo1: CanBeState<T>, pseudo2: CanBeState<T>, options: { [T]: { [T]: State<G> } }): State<G>
 	local state1 = pseudo1 :: any
 	local state2 = pseudo2 :: any
 	if typeof(state1) == "string" and typeof(state2) == "string" then
@@ -505,10 +485,7 @@ function Guide:GetColor(guiColorPalette: CanBeState<PseudoEnum.GuiColorPalette>)
 	return handleDynamicEnum(guiColorPalette, self._Colors)
 end
 
-function Guide:GetContrastColor(
-	backColorPalette: CanBeState<PseudoEnum.GuiColorPalette>,
-	goalColorPalette: CanBeState<PseudoEnum.GuiColorPalette>?
-): State<Color3>
+function Guide:GetContrastColor(backColorPalette: CanBeState<PseudoEnum.GuiColorPalette>, goalColorPalette: CanBeState<PseudoEnum.GuiColorPalette>?): State<Color3>
 	assert(backColorPalette ~= nil, "Bad GuiColorPalette")
 	if goalColorPalette == nil then
 		return handleDynamicEnum(backColorPalette, self._ContrastColors)
@@ -549,22 +526,14 @@ function Guide.getContrastRatio(foreground: Color3, background: Color3): number
 	return (lighterRelativeLuminance + 0.05) / (darkerRelativeLuminance + 0.05)
 end
 
-function Guide.checkContrast(
-	color: Color3,
-	background: Color3,
-	contrastStandard: PseudoEnum.ContrastStandardType
-): boolean
+function Guide.checkContrast(color: Color3, background: Color3, contrastStandard: PseudoEnum.ContrastStandardType): boolean
 	local minRatio = CONTRAST_STANDARD_RATIOS[contrastStandard]
 	local ratio = Guide.getContrastRatio(color, background)
 	return ratio >= minRatio
 end
 
 -- https://github.com/alex-page/a11ycolor/blob/main/index.js
-function Guide.getReadableColor(
-	color: Color3,
-	background: Color3,
-	contrastStandard: PseudoEnum.ContrastStandardType?
-): Color3
+function Guide.getReadableColor(color: Color3, background: Color3, contrastStandard: PseudoEnum.ContrastStandardType?): Color3
 	contrastStandard = PseudoEnum.ContrastStandardType.Default
 	assert(contrastStandard ~= nil)
 

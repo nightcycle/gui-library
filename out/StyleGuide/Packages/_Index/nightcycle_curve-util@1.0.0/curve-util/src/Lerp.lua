@@ -5,19 +5,14 @@ function lerp(value1: any, value2: any, alpha: number): any --written by CJ_Oyer
 	assert(typeof(value1) == typeof(value2), "Type mismatch")
 	assert(typeof(alpha) == "number", "Bad alpha")
 
-	local solver: ((any, any, number) -> any) = typeLerps[typeof(value1)]
-		or function()
-			return value1:Lerp(value2, alpha)
-		end
+	local solver: (any, any, number) -> any = typeLerps[typeof(value1)] or function()
+		return value1:Lerp(value2, alpha)
+	end
 	local result: any = solver(value1, value2, alpha)
 	return result
 end
 
-function sequence(
-	seq1: NumberSequence | ColorSequence,
-	seq2: NumberSequence | ColorSequence,
-	alpha: number
-): NumberSequence | ColorSequence
+function sequence(seq1: NumberSequence | ColorSequence, seq2: NumberSequence | ColorSequence, alpha: number): NumberSequence | ColorSequence
 	local values = {}
 	local envelopes = {}
 
@@ -40,11 +35,7 @@ function sequence(
 				local a = (keyT - this.Time) / (next.Time - this.Time)
 				-- Evaluate the real value between the points using alpha
 				if typeof(seq) == "ColorSequence" then
-					result = Color3.new(
-						(next.Value.R - this.Value.R) * a + this.Value.R,
-						(next.Value.G - this.Value.G) * a + this.Value.G,
-						(next.Value.B - this.Value.B) * a + this.Value.B
-					)
+					result = Color3.new((next.Value.R - this.Value.R) * a + this.Value.R, (next.Value.G - this.Value.G) * a + this.Value.G, (next.Value.B - this.Value.B) * a + this.Value.B)
 				elseif typeof(seq) == "NumberSequence" then
 					result = (next.Value - this.Value) * a + this.Value
 				end
@@ -92,8 +83,7 @@ function sequence(
 		local newKeypoint: NumberSequenceKeypoint | ColorSequenceKeypoint
 		if typeof(seq1) == "NumberSequence" then
 			local eList = envelopes[t]
-			newKeypoint =
-				NumberSequenceKeypoint.new(t, lerp(vList[1], vList[2], alpha), lerp(eList[1], eList[2], alpha))
+			newKeypoint = NumberSequenceKeypoint.new(t, lerp(vList[1], vList[2], alpha), lerp(eList[1], eList[2], alpha))
 		else
 			if typeof(seq1) == "NumberSequence" then
 				newKeypoint = NumberSequenceKeypoint.new(t, lerp(vList[1], vList[2], alpha))
@@ -202,21 +192,13 @@ typeLerps = {
 		assert(typeof(result) == "NumberSequence", "Bad NumberSequence")
 		return result
 	end,
-	["ColorSequenceKeypoint"] = function(
-		k1: ColorSequenceKeypoint,
-		k2: ColorSequenceKeypoint,
-		alpha: number
-	): ColorSequenceKeypoint
+	["ColorSequenceKeypoint"] = function(k1: ColorSequenceKeypoint, k2: ColorSequenceKeypoint, alpha: number): ColorSequenceKeypoint
 		local kTime: number = lerp(k1.Time, k2.Time, alpha)
 		local kValue: Color3 = lerp(k1.Value, k2.Value, alpha)
 
 		return ColorSequenceKeypoint.new(kTime, kValue)
 	end,
-	["NumberSequenceKeypoint"] = function(
-		k1: NumberSequenceKeypoint,
-		k2: NumberSequenceKeypoint,
-		alpha: number
-	): NumberSequenceKeypoint
+	["NumberSequenceKeypoint"] = function(k1: NumberSequenceKeypoint, k2: NumberSequenceKeypoint, alpha: number): NumberSequenceKeypoint
 		local kTime: number = lerp(k1.Time, k2.Time, alpha)
 		local kValue: number = lerp(k1.Value, k2.Value, alpha)
 		return NumberSequenceKeypoint.new(kTime, kValue)

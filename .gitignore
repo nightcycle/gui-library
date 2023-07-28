@@ -3,6 +3,11 @@
 # Directories
 Packages/**
 scripts/compile/__pycache__/**
+tests/lsp/**
+tests/selene/**
+types
+lints
+.env
 
 # Files
 sourcemap.json
